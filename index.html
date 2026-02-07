@@ -372,8 +372,9 @@
             title: `Injecting ${name}...`
         });
 
-        // API Call
-        const url = `https://mrghost.onrender.com/join?tc=${tc}&uid1=${u1}&emote_id=${id}`;
+        // Your Exact API Format:
+            // https://mrghost.onrender.com/join?tc=7181966&uid1=14491301036&uid2={}&uid3={}&uid4=&uid5={}&uid={}&emote_id=909000098
+            const finalUrl = `https://mrghost.onrender.com/join?tc=${tc}&uid1=${u1}&uid2={${u2}}&uid3={${u3}}&uid4=${u4}&uid5={${u5}}&uid={${u1}}&emote_id=${emoteId}`;
         
         try {
             await fetch(url, { mode: 'no-cors' });
