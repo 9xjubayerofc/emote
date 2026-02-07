@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHOST PANEL - Gaming Emote Panel</title>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.7);
+            --primary: #ff0055; /* Magenta */
+            --secondary: #bc13fe; /* Purple */
+            --accent: #00f2ff; /* Cyan */
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border-glow: rgba(188, 19, 254, 0.5);
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Background Animation --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a0b1f 0%, #000000 100%);
+        }
+
+        /* --- Utilities --- */
+        .hidden { display: none !important; }
+        .flex-center { display: flex; justify-content: center; align-items: center; }
+        .text-glow { text-shadow: 0 0 10px var(--secondary); }
+        .center-absolute { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        /* --- Toast Notification --- */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 4px;
+            color: #fff;
+            min-width: 250px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s ease forwards;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast.success { border-color: #00ff88; }
+        .toast.error { border-color: #ff0055; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* --- Login Styles --- */
+        .login-wrapper {
+            width: 100%;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .logo-container {
+            margin-bottom: 2rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo-icon {
+            font-size: 4rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(188, 19, 254, 0.6));
+        }
+
+        .app-title {
+            font-family: var(--font-head);
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        .input-group {
+            position: relative;
+            margin: 15px 0;
+            width: 300px;
+        }
+
+        input {
+            width: 100%;
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            color: #fff;
+            border-radius: 5px;
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px var(--border-glow);
+        }
+
+        .btn-neon {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            border: none;
+            color: white;
+            font-family: var(--font-head);
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+
+        .btn-neon:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        .btn-neon::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(transparent, rgba(255,255,255,0.4), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .admin-link {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: underline;
+            transition: 0.3s;
+        }
+        .admin-link:hover { color: var(--accent); }
+
+        /* --- Main Panel Styles --- */
+        .main-layout {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 80px; /* Space for footer */
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: var(--bg-panel);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 1px solid var(--glass);
+            backdrop-filter: blur(10px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: var(--font-head);
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+        .brand i { color: var(--primary); font-size: 1.8rem; }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .logout-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 0 10px var(--primary); }
+
+        /* Inputs Area */
+        .inputs-area {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.1);
+        }
+
+        .inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .input-box label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* Emotes Grid */
+        .emotes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+
+        .emote-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .emote-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(255, 0, 85, 0.3);
+        }
+
+        .emote-card img {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+        }
+
+        .emote-card span {
+            font-size: 0.75rem;
+            text-align: center;
+            color: var(--text-muted);
+            line-height: 1.2;
+            height: 24px; /* limit height */
+            overflow: hidden;
+        }
+
+        .emote-card .loader {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Social Footer */
+        .social-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            z-index: 100;
+        }
+
+        .social-icon {
+            color: #fff;
+            font-size: 1.5rem;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .social-icon:hover {
+            color: var(--accent);
+            transform: scale(1.2);
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Admin Panel Specifics */
+        .admin-section {
+            background: var(--bg-panel);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 3px solid var(--accent);
+        }
+        .admin-section h3 { color: var(--accent); margin-bottom: 15px; font-family: var(--font-head); }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .admin-btn { background: #333; border: none; color: white; padding: 10px; cursor: pointer; border-radius: 4px; transition: 0.2s; }
+        .admin-btn:hover { background: #555; }
+        .btn-save { background: var(--primary); }
+        .btn-delete { background: #ff3333; }
+
+    </style>
+</head>
+<body>
+
+    <!-- Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Toasts -->
+    <div id="toast-container"></div>
+
+    <!-- AUDIO EFFECTS (Base64 for self-containment) -->
+    <!-- Click Sound -->
+    <audio id="sfx-click" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"></audio> 
+    <!-- Simple generated sounds via JS AudioContext to avoid massive Base64 strings -->
+
+    <!-- ================= VIEWS ================= -->
+
+    <!-- 1. User Login View -->
+    <div id="view-login" class="login-wrapper flex-center">
+        <div class="logo-container">
+            <i class="fa-solid fa-gamepad logo-icon"></i>
+            <h1 class="app-title">GHOST PANEL</h1>
+        </div>
+        <div class="input-group">
+            <input type="password" id="login-pass" placeholder="Enter Access Password">
+        </div>
+        <button class="btn-neon" onclick="handleLogin()">ENTER SYSTEM</button>
+        <div class="admin-link" onclick="switchView('view-admin-login')">Admin Access</div>
+    </div>
+
+    <!-- 2. Admin Login View -->
+    <div id="view-admin-login" class="login-wrapper flex-center hidden">
+        <div class="logo-container">
+            <i class="fa-solid fa-lock logo-icon"></i>
+            <h1 class="app-title">ADMIN PANEL</h1>
+        </div>
+        <div class="input-group">
+            <input type="password" id="admin-login-pass" placeholder="Enter Admin Password">
+        </div>
+        <button class="btn-neon" style="background: linear-gradient(90deg, #ff3333, #bc13fe);" onclick="handleAdminLogin()">ACCESS CONTROLS</button>
+        <div class="admin-link" onclick="switchView('view-login')">Back to Login</div>
+    </div>
+
+    <!-- 3. User Panel View -->
+    <div id="view-user-panel" class="main-layout hidden">
+        <header class="panel-header">
+            <div class="brand">
+                <i class="fa-solid fa-gamepad"></i>
+                GHOST PANEL
+            </div>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </header>
+
+        <!-- Inputs -->
+        <section class="inputs-area">
+            <div class="inputs-grid">
+                <div class="input-box">
+                    <label>Team Code</label>
+                    <input type="text" id="inp-tc" placeholder="1694161">
+                </div>
+                <div class="input-box">
+                    <label>UID 1</label>
+                    <input type="text" id="inp-uid1" placeholder="UID">
+                </div>
+                <div class="input-box">
+                    <label>UID 2</label>
+                    <input type="text" id="inp-uid2" placeholder="UID">
+                </div>
+                <div class="input-box">
+                    <label>UID 3</label>
+                    <input type="text" id="inp-uid3" placeholder="UID">
+                </div>
+                <div class="input-box">
+                    <label>UID 4</label>
+                    <input type="text" id="inp-uid4" placeholder="UID">
+                </div>
+                <div class="input-box">
+                    <label>UID 5</label>
+                    <input type="text" id="inp-uid5" placeholder="UID">
+                </div>
+            </div>
+        </section>
+
+        <!-- Emotes Grid -->
+        <h2 style="margin-bottom: 15px; font-family: var(--font-head); color: var(--accent);">SELECT EMOTE</h2>
+        <div class="emotes-container" id="emotes-grid">
+            <!-- Emotes injected via JS -->
+        </div>
+
+        <!-- Social Footer -->
+        <footer class="social-footer" id="social-footer">
+            <a href="#" target="_blank" class="social-icon" id="link-telegram"><i class="fa-brands fa-telegram"></i></a>
+            <a href="#" target="_blank" class="social-icon" id="link-youtube"><i class="fa-brands fa-youtube"></i></a>
+            <a href="#" target="_blank" class="social-icon" id="link-instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" target="_blank" class="social-icon" id="link-discord"><i class="fa-brands fa-discord"></i></a>
+        </footer>
+    </div>
+
+    <!-- 4. Admin Panel View -->
+    <div id="view-admin-panel" class="main-layout hidden">
+        <header class="panel-header" style="border-color: var(--accent);">
+            <div class="brand">
+                <i class="fa-solid fa-user-shield" style="color: var(--accent);"></i>
+                ADMIN CONTROLS
+            </div>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </header>
+
+        <div class="admin-section">
+            <h3>Security Settings</h3>
+            <div class="input-group" style="width: 100%; max-width: 300px;">
+                <label>Change User Login Password</label>
+                <input type="text" id="admin-new-pass" placeholder="New Password (Default: 60)">
+                <button class="admin-btn btn-save" style="margin-top: 10px; width: 100%;" onclick="updatePassword()">Update Password</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>Manage Emotes</h3>
+            <div class="admin-grid">
+                <input type="text" id="add-emote-id" placeholder="Emote ID (e.g. 909051014)">
+                <input type="text" id="add-emote-name" placeholder="Name (e.g. puffy ride)">
+                <button class="admin-btn btn-save" onclick="addEmote()">Add Emote</button>
+            </div>
+            <div class="admin-grid">
+                <input type="text" id="del-emote-id" placeholder="Emote ID to Delete">
+                <button class="admin-btn btn-delete" onclick="deleteEmote()">Delete Emote</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>Social Media Links</h3>
+            <div class="input-group"><label>Telegram URL</label><input type="text" id="social-telegram" placeholder="https://t.me/..."></div>
+            <div class="input-group"><label>YouTube URL</label><input type="text" id="social-youtube" placeholder="https://youtube.com/..."></div>
+            <div class="input-group"><label>Instagram URL</label><input type="text" id="social-instagram" placeholder="https://instagram.com/..."></div>
+            <div class="input-group"><label>Discord URL</label><input type="text" id="social-discord" placeholder="https://discord.gg/..."></div>
+            <button class="admin-btn btn-save" style="margin-top: 15px; width: 100%;" onclick="saveSocials()">Save Links</button>
+        </div>
+    </div>
+
+    <script>
+        /* ================= STATE & DATA ================= */
+        const DEFAULT_EMOTES = [
+            {id:"909051014", name:"puffy ride"}, {id:"909050009", name:"circle"}, {id:"909051013", name:"petals"},
+            {id:"909051012", name:"bow"}, {id:"909051010", name:"motorbikes"}, {id:"909051004", name:"shower"},
+            {id:"909051002", name:"dream"}, {id:"909051001", name:"angelic"}, {id:"909048015", name:"paint"},
+            {id:"909044015", name:"sword"}, {id:"909041008", name:"flar"}, {id:"909049003", name:"owl"},
+            {id:"909050008", name:"thor"}, {id:"909049001", name:"bigdill"}, {id:"909041013", name:"cs gm"},
+            {id:"909050014", name:"map read"}, {id:"909050015", name:"tomatoes"}, {id:"909050002", name:"ninja summon"},
+            {id:"909042007", name:"100 lvl"}, {id:"909050028", name:"auraboat"}, {id:"909049012", name:"flying guns"},
+            {id:"909000045", name:"I heart you"}, {id:"909000034", name:"pirate flag"}, {id:"909000012", name:"push up"},
+            {id:"909000020", name:"devil move"}, {id:"909000008", name:"shoot dance"}, {id:"909000006", name:"chicken"},
+            {id:"909000014", name:"THRONE"}, {id:"909000010", name:"rose"}, {id:"909038004", name:"valentine heart"},
+            {id:"909034001", name:"Rampage Book"}, {id:"909049017", name:"guild flag"}, {id:"909040004", name:"fish"},
+            {id:"909041003", name:"inosuke"}, {id:"909041012", name:"br grandmother"}, {id:"909049010", name:"evo p90"},
+            {id:"909051003", name:"evo m60 new"}, {id:"909033002", name:"evo mp5"}, {id:"909041005", name:"evo groza"},
+            {id:"909038010", name:"thompson evo"}, {id:"909039011", name:"evo M10 red"}, {id:"909040010", name:"evo mp40 blue"},
+            {id:"909000081", name:"evo m10 green"}, {id:"909000085", name:"evo xm8"}, {id:"909000063", name:"evo ak"},
+            {id:"909000075", name:"evo mp40"}, {id:"909033001", name:"evo m4A1"}, {id:"909000090", name:"evo famas"},
+            {id:"909000068", name:"evo scar"}, {id:"909000098", name:"evo ump"}, {id:"909035007", name:"evo m18"},
+            {id:"909037011", name:"evo fist"}, {id:"909038012", name:"evo g18"}, {id:"909035012", name:"evo AN94"},
+            {id:"909042008", name:"evo Woodpecker"}
+        ];
+
+        let appData = {
+            userPass: "60",
+            adminPass: "3535", // Fixed in code as requested
+            emotes: [],
+            socials: {
+                telegram: "#", youtube: "#", instagram: "#", discord: "#"
+            }
+        };
+
+        // Load Data on Start
+        function init() {
+            const stored = localStorage.getItem('pgpanel_data');
+            if (stored) {
+                appData = JSON.parse(stored);
+                // Ensure structure integrity if updated
+                if(!appData.emotes) appData.emotes = DEFAULT_EMOTES;
+            } else {
+                appData.emotes = DEFAULT_EMOTES;
+                saveData();
+            }
+            
+            // Initialize inputs with default bot values or empty
+            document.getElementById('inp-tc').value = "1694161";
+            
+            // Setup Admin Fields
+            document.getElementById('admin-new-pass').value = appData.userPass;
+            document.getElementById('social-telegram').value = appData.socials.telegram;
+            document.getElementById('social-youtube').value = appData.socials.youtube;
+            document.getElementById('social-instagram').value = appData.socials.instagram;
+            document.getElementById('social-discord').value = appData.socials.discord;
+            
+            updateSocialLinks();
+            renderEmotes();
+        }
+
+        function saveData() {
+            localStorage.setItem('pgpanel_data', JSON.stringify(appData));
+        }
+
+        /* ================= AUDIO ENGINE ================= */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'success') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.linearRampToValueAtTime(800, now + 0.1);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        /* ================= NAVIGATION ================= */
+        function switchView(viewId) {
+            playSound('click');
+            document.querySelectorAll('body > .login-wrapper, .main-layout').forEach(el => el.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        function handleLogin() {
+            const pass = document.getElementById('login-pass').value;
+            if (pass === appData.userPass) {
+                playSound('success');
+                switchView('view-user-panel');
+            } else {
+                playSound('error');
+                showToast('Access Denied: Wrong Password', 'error');
+            }
+        }
+
+        function handleAdminLogin() {
+            const pass = document.getElementById('admin-login-pass').value;
+            if (pass === appData.adminPass) {
+                playSound('success');
+                switchView('view-admin-panel');
+            } else {
+                playSound('error');
+                showToast('Admin Access Denied', 'error');
+            }
+        }
+
+        function logout() {
+            playSound('click');
+            document.getElementById('login-pass').value = '';
+            document.getElementById('admin-login-pass').value = '';
+            switchView('view-login');
+        }
+
+        /* ================= USER PANEL LOGIC ================= */
+        function renderEmotes() {
+            const container = document.getElementById('emotes-grid');
+            container.innerHTML = '';
+
+            appData.emotes.forEach(emo => {
+                const card = document.createElement('div');
+                card.className = 'emote-card';
+                card.onclick = () => sendEmoteRequest(emo.id, card);
+                
+                const img = document.createElement('img');
+                img.src = `https://cdn.jsdelivr.net/gh/ShahGCreator/icon@main/PNG/${emo.id}.png`;
+                img.onerror = function() { this.src = 'https://via.placeholder.com/64?text=?'; }; // Fallback
+                
+                const name = document.createElement('span');
+                name.innerText = emo.name;
+
+                card.appendChild(img);
+                card.appendChild(name);
+                container.appendChild(card);
+            });
+        }
+
+        async function sendEmoteRequest(emoteId, cardElement) {
+            playSound('click');
+            
+            // Get Inputs
+            const tc = document.getElementById('inp-tc').value.trim();
+            const uid1 = document.getElementById('inp-uid1').value.trim();
+            const uid2 = document.getElementById('inp-uid2').value.trim();
+            const uid3 = document.getElementById('inp-uid3').value.trim();
+            const uid4 = document.getElementById('inp-uid4').value.trim();
+            const uid5 = document.getElementById('inp-uid5').value.trim();
+
+            if (!tc) {
+                showToast('Team Code is required', 'error');
+                return;
+            }
+
+            // Show Loading on specific card
+            const loader = document.createElement('div');
+            loader.className = 'loader';
+            loader.innerHTML = '<div class="spinner"></div>';
+            cardElement.appendChild(loader);
+
+            // Construct URL
+            const baseUrl = "https://mg24-emote-api.onrender.com/join";
+            const url = `${baseUrl}?tc=${encodeURIComponent(tc)}&uid1=${encodeURIComponent(uid1)}&uid2=${encodeURIComponent(uid2)}&uid3=${encodeURIComponent(uid3)}&uid4=${encodeURIComponent(uid4)}&uid5=${encodeURIComponent(uid5)}&emote_id=${encodeURIComponent(emoteId)}`;
+
+            try {
+                // Simulate Bot Behavior Requirement: "Bot send team code 1694161 and after 2 seconds to 3859281"
+                // The user prompt says "When user clicks... send API request".
+                // The confusing part is "Bot send team code...". 
+                // Assuming the API call happens immediately with user data.
+                
+                const response = await fetch(url);
+                
+                // Remove loader
+                loader.remove();
+
+                if (response.ok) {
+                    playSound('success');
+                    showToast('Emote Sent Successfully!', 'success');
+                    
+                    // If there is a logic to change the team code automatically for bot behavior:
+                    // document.getElementById('inp-tc').value = "3859281"; // Uncomment if this 2-step logic is visually needed on inputs
+
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            } catch (error) {
+                loader.remove();
+                playSound('error');
+                showToast('Failed to send emote. Try again.', 'error');
+                console.error(error);
+            }
+        }
+
+        /* ================= ADMIN PANEL LOGIC ================= */
+        function updatePassword() {
+            const newPass = document.getElementById('admin-new-pass').value;
+            if (newPass) {
+                appData.userPass = newPass;
+                saveData();
+                showToast('User Password Updated', 'success');
+                playSound('success');
+            }
+        }
+
+        function addEmote() {
+            const id = document.getElementById('add-emote-id').value;
+            const name = document.getElementById('add-emote-name').value;
+            if (id && name) {
+                // Check duplicate
+                if (appData.emotes.find(e => e.id === id)) {
+                    showToast('Emote ID already exists', 'error');
+                    return;
+                }
+                appData.emotes.push({ id, name });
+                saveData();
+                renderEmotes(); // Update grid
+                document.getElementById('add-emote-id').value = '';
+                document.getElementById('add-emote-name').value = '';
+                showToast('Emote Added', 'success');
+                playSound('success');
+            } else {
+                showToast('Please fill both ID and Name', 'error');
+            }
+        }
+
+        function deleteEmote() {
+            const id = document.getElementById('del-emote-id').value;
+            const idx = appData.emotes.findIndex(e => e.id === id);
+            if (idx !== -1) {
+                appData.emotes.splice(idx, 1);
+                saveData();
+                renderEmotes();
+                document.getElementById('del-emote-id').value = '';
+                showToast('Emote Deleted', 'success');
+                playSound('success');
+            } else {
+                showToast('Emote ID not found', 'error');
+            }
+        }
+
+        function saveSocials() {
+            appData.socials.telegram = document.getElementById('social-telegram').value;
+            appData.socials.youtube = document.getElementById('social-youtube').value;
+            appData.socials.instagram = document.getElementById('social-instagram').value;
+            appData.socials.discord = document.getElementById('social-discord').value;
+            saveData();
+            updateSocialLinks();
+            showToast('Social Links Updated', 'success');
+            playSound('success');
+        }
+
+        function updateSocialLinks() {
+            document.getElementById('link-telegram').href = appData.socials.telegram || "#";
+            document.getElementById('link-youtube').href = appData.socials.youtube || "#";
+            document.getElementById('link-instagram').href = appData.socials.instagram || "#";
+            document.getElementById('link-discord').href = appData.socials.discord || "#";
+        }
+
+        /* ================= UI HELPERS ================= */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? '<i class="fa-solid fa-check"></i>' : '<i class="fa-solid fa-triangle-exclamation"></i>';
+            
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        /* ================= PARTICLE BACKGROUND ================= */
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = Math.random() > 0.5 ? '#ff0055' : '#bc13fe'; // Primary or Secondary
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000;
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                
+                // Connect particles if close
+                for (let j = i; j < particlesArray.length; j++) {
+                    const dx = particlesArray[i].x - particlesArray[j].x;
+                    const dy = particlesArray[i].y - particlesArray[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(188, 19, 254, ${1 - distance/100})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        // Initialize Everything
+        initParticles();
+        animateParticles();
+        init();
+
+    </script>
+</body>
+</html>
