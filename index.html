@@ -375,44 +375,28 @@
         // Your Exact API Format:
             // https://mrghost.onrender.com/join?tc=7181966&uid1=14491301036&uid2={}&uid3={}&uid4=&uid5={}&uid={}&emote_id=909000098
             const finalUrl = `https://mrghost.onrender.com/join?tc=${tc}&uid1=${u1}&uid2={${u2}}&uid3={${u3}}&uid4=${u4}&uid5={${u5}}&uid={${u1}}&emote_id=${emoteId}`;
-        
-        try {
-            await fetch(url, { mode: 'no-cors' });
-            // সাকসেস নোটিফিকেশন
-            setTimeout(() => {
-                Swal.fire({
-                    title: 'Success!',
-                    text: `${name} has been sent to server.`,
-                    icon: 'success',
-                    background: '#161b22',
-                    color: '#fff',
-                    confirmButtonColor: '#2ea043',
-                    timer: 2000
+
+            try {
+                await fetch(finalUrl, { 
+                    method: 'GET',
+                    mode: 'no-cors' 
                 });
-            }, 1000);
-        } catch (error) {
-            Swal.fire({
-                title: 'Failed!',
-                text: 'Server connection error.',
-                icon: 'warning',
-                background: '#161b22',
-                color: '#fff'
-            });
+                showToast("Bot Request Sent!");
+            } catch (err) {
+                showToast("Connection Error", "error");
+            } finally {
+                setTimeout(() => loader.remove(), 1000);
+            }
         }
-    }
 
-    function filterEmotes() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        const cards = document.querySelectorAll('.emote-card');
-        cards.forEach(card => {
-            const name = card.querySelector('span').innerText.toLowerCase();
-            card.style.display = name.includes(query) ? 'block' : 'none';
-        });
-    }
-
-    // Initialize
-    renderEmotes();
-</script>
-
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
 </body>
 </html>
