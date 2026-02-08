@@ -3,179 +3,446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GHOST PANEL - Premium Emote Bot</title>
+    <title>GHOST EMOTE SERVER - Premium Bot</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #050505; --bg-panel: rgba(20, 20, 25, 0.85);
-            --primary: #ff0055; --secondary: #bc13fe; --accent: #00f2ff;
-            --text-main: #ffffff; --text-muted: #a0a0a0;
-            --glass: rgba(255, 255, 255, 0.05); --border-glow: rgba(188, 19, 254, 0.5);
-            --font-head: 'Orbitron', sans-serif; --font-body: 'Rajdhani', sans-serif;
+            --bg-dark: #050505;
+            --primary: #00ff88; 
+            --secondary: #00e1ff; 
+            --accent: #ff00ea; 
+            --glass: rgba(255, 255, 255, 0.03);
+            --border-glow: rgba(0, 255, 136, 0.3);
+            --font-head: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-body); min-height: 100vh; overflow-x: hidden; }
-        
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #1a0b1f 0%, #000000 100%); }
-        .hidden { display: none !important; }
-        
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
-        .toast { background: rgba(0, 255, 136, 0.15); backdrop-filter: blur(10px); border-left: 4px solid #00ff88; padding: 15px 25px; border-radius: 4px; color: #fff; margin-bottom: 10px; animation: slideIn 0.3s ease forwards; }
+        body { 
+            background-color: var(--bg-dark); 
+            color: #fff; 
+            font-family: var(--font-body); 
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.1; }
 
-        /* Login Style */
-        .login-wrapper { width: 100%; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .logo-icon { font-size: 4rem; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 15px rgba(188, 19, 254, 0.6)); }
-        .app-title { font-family: var(--font-head); font-size: 2.2rem; letter-spacing: 2px; margin: 10px 0; }
-        .input-group { margin: 15px 0; width: 300px; }
-        input { width: 100%; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); padding: 14px; color: #fff; border-radius: 5px; font-size: 1.1rem; text-align: center; transition: 0.3s; }
-        input:focus { border-color: var(--secondary); box-shadow: 0 0 15px var(--border-glow); }
-        .btn-neon { width: 300px; padding: 15px; background: linear-gradient(90deg, var(--secondary), var(--primary)); border: none; color: white; font-family: var(--font-head); font-weight: bold; cursor: pointer; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+        /* --- Unlock System Styles --- */
+        .unlock-view {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
 
-        /* Main Panel Style */
-        .main-layout { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--bg-panel); border-radius: 10px; border: 1px solid var(--glass); margin-bottom: 20px; }
-        .brand { font-family: var(--font-head); font-size: 1.5rem; font-weight: 900; color: var(--primary); }
-        
-        .inputs-area { background: var(--bg-panel); padding: 20px; border-radius: 10px; border: 1px solid var(--border-glow); margin-bottom: 25px; }
-        .inputs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        .input-box label { display: block; margin-bottom: 5px; font-size: 0.85rem; color: var(--accent); font-weight: bold; text-transform: uppercase; }
+        .shield-icon { font-size: 80px; color: var(--primary); margin-bottom: 20px; filter: drop-shadow(0 0 15px var(--primary)); }
+        .unlock-title { font-family: var(--font-head); font-size: 1.4rem; margin-bottom: 5px; letter-spacing: 1px; color: #fff; }
+        .unlock-subtitle { font-size: 0.75rem; color: #aaa; margin-bottom: 30px; text-transform: uppercase; }
+        .task-list { width: 100%; max-width: 340px; }
 
-        .emotes-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; padding-bottom: 100px; }
-        .emote-card { background: var(--bg-panel); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; position: relative; }
-        .emote-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 5px 15px rgba(255, 0, 85, 0.2); }
-        .emote-card img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 8px; }
-        .emote-card span { font-size: 0.8rem; text-align: center; color: var(--text-muted); font-weight: bold; }
+        .channel-btn {
+            width: 100%; padding: 14px; margin-bottom: 12px; border-radius: 50px; border: none;
+            background: #ff0055; color: white; font-family: var(--font-body); font-weight: bold;
+            font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px;
+            text-decoration: none; transition: background 0.5s ease;
+        }
+        .channel-btn.verified { background: var(--primary) !important; color: #000; }
 
-        .loader-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); border-radius: 8px; display: flex; justify-content: center; align-items: center; z-index: 5; }
-        .spinner { width: 25px; height: 25px; border: 3px solid var(--accent); border-top: 3px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .btn-loader {
+            display: none; width: 18px; height: 18px; border: 2px solid #fff;
+            border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+
+        .verify-btn {
+            margin-top: 20px; background: transparent; border: 2px solid #ff0055; color: #ff0055;
+            padding: 10px 40px; border-radius: 8px; font-family: var(--font-head); font-size: 0.85rem;
+            cursor: pointer; transition: 0.4s; display: flex; align-items: center; gap: 10px;
+        }
+        .verify-btn.ready { border-color: var(--primary); color: var(--primary); }
+
+        /* --- Original Panel Styles --- */
+        .container { max-width: 550px; margin: 0 auto; padding: 15px; }
+
+        header { 
+            text-align: center; padding: 20px 0; background: rgba(0,0,0,0.8); border-bottom: 2px solid var(--primary);
+            box-shadow: 0 0 20px var(--border-glow); margin-bottom: 20px; position: sticky; top: 0; z-index: 100;
+        }
+        .header-title { font-family: var(--font-head); font-size: 1.2rem; color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 1px; }
+
+        .section-box {
+            background: rgba(15, 15, 20, 0.9); border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 12px; padding: 15px; margin-bottom: 20px;
+        }
+        .section-title { font-family: var(--font-head); font-size: 0.8rem; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .title-green { color: var(--primary); }
+        .title-blue { color: var(--secondary); }
+        .title-pink { color: var(--accent); }
+
+        .input-wrapper { position: relative; margin-bottom: 12px; }
+        input {
+            width: 100%; background: #000; border: 1px solid #333; padding: 12px 15px;
+            color: #fff; border-radius: 8px; font-size: 1rem; transition: 0.3s; font-family: var(--font-body);
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 10px var(--border-glow); }
+        .copy-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--primary); cursor: pointer; opacity: 0.6; }
+
+        #search-emote { border-color: var(--accent); margin-bottom: 15px; background: rgba(255,0,234,0.05); }
+
+        .emotes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-height: 600px; overflow-y: auto; padding-right: 5px; }
+        .emotes-grid::-webkit-scrollbar { width: 4px; }
+        .emotes-grid::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+        .emote-card {
+            background: #111; border: 1px solid #222; border-radius: 10px; padding: 10px;
+            text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center;
+        }
+        .emote-card:hover { border-color: var(--primary); transform: translateY(-3px); background: #1a1a1a; }
+        .emote-card img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
+        .emote-card span { display: block; font-size: 0.65rem; color: #eee; font-weight: bold; text-transform: uppercase; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; width: 100%; }
+
+        .loader-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 10; border-radius: 10px; }
+        .spinner { width: 25px; height: 25px; border: 3px solid var(--primary); border-top: 3px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.9); padding: 15px; text-align: center; border-top: 1px solid var(--glass); }
-        .social-btn { color: #fff; font-size: 1.8rem; margin: 0 15px; transition: 0.3s; }
-        .social-btn:hover { color: var(--accent); transform: scale(1.2); }
+        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; text-align: center; pointer-events: none; }
+        .toast { background: var(--primary); color: #000; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; margin-top: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: inline-block; animation: slideUp 0.3s ease; }
+        
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .hidden { display: none !important; }
+        .login-view { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
     </style>
 </head>
 <body>
-    <canvas id="bg-canvas"></canvas>
-    <div id="toast-container"></div>
 
-    <div id="view-login" class="login-wrapper">
-        <i class="fa-solid fa-ghost logo-icon"></i>
-        <h1 class="app-title">GHOST PANEL</h1>
-        <div class="input-group">
-            <input type="password" id="login-pass" placeholder="Enter Password">
-        </div>
-        <button class="btn-neon" onclick="handleLogin()">ACCESS SYSTEM</button>
+<canvas id="bg-canvas"></canvas>
+<div id="toast-container"></div>
+
+<div id="unlock-step-1" class="unlock-view hidden">
+    <h1 class="unlock-title">AX EMOTE SERVER UNLOCK 🔒</h1>
+    <p class="unlock-subtitle">COMPLETE ALL TASKS TO UNLOCK</p>
+    <button id="main-enter-btn" class="verify-btn" onclick="startLoadingStep1(this)">
+        <span class="btn-loader"></span> VERIFY & ENTER
+    </button>
+</div>
+
+<div id="unlock-step-2" class="unlock-view hidden">
+    <div class="shield-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <h1 class="unlock-title">AX EMOTE SERVER UNLOCK 🔒</h1>
+    <p class="unlock-subtitle">PLEASE VERIFY ALL LINKS</p>
+
+    <div class="task-list">
+        <a href="https://t.me/your_link" target="_blank" class="channel-btn" onclick="handleLinkTask(this)">
+            <span class="btn-loader"></span> <i class="fa-brands fa-telegram"></i> Join Telegram
+        </a>
+        <a href="https://t.me/your_link" target="_blank" class="channel-btn" onclick="handleLinkTask(this)">
+            <span class="btn-loader"></span> <i class="fa-brands fa-telegram"></i> Join New Telegram
+        </a>
+        <a href="https://youtube.com/@your_channel" target="_blank" class="channel-btn" onclick="handleLinkTask(this)">
+            <span class="btn-loader"></span> <i class="fa-brands fa-youtube"></i> Subscribe YouTube
+        </a>
+        <a href="https://t.me/your_link" target="_blank" class="channel-btn" onclick="handleLinkTask(this)">
+            <span class="btn-loader"></span> <i class="fa-brands fa-telegram"></i> Join 2d Telegram
+        </a>
     </div>
 
-    <div id="view-panel" class="main-layout hidden">
-        <header>
-            <div class="brand"><i class="fa-solid fa-skull"></i> GHOST V1</div>
-            <button onclick="location.reload()" style="background:none; border:1px solid var(--primary); color:var(--primary); padding:8px 15px; border-radius:5px; cursor:pointer;">LOGOUT</button>
-        </header>
+    <button id="final-verify-btn" class="verify-btn" onclick="completeVerification()">
+        <span class="btn-loader"></span> VERIFY & ENTER
+    </button>
+</div>
 
-        <section class="inputs-area">
-            <div class="inputs-grid">
-                <div class="input-box"><label>Team Code</label><input type="text" id="inp-tc" placeholder="7181966"></div>
-                <div class="input-box"><label>UID 1 (Main)</label><input type="text" id="inp-uid1" placeholder="14491301036"></div>
-                <div class="input-box"><label>UID 2</label><input type="text" id="inp-uid2" placeholder="Optional"></div>
-                <div class="input-box"><label>UID 3</label><input type="text" id="inp-uid3" placeholder="Optional"></div>
-                <div class="input-box"><label>UID 4</label><input type="text" id="inp-uid4" placeholder="Optional"></div>
-                <div class="input-box"><label>UID 5</label><input type="text" id="inp-uid5" placeholder="Optional"></div>
-            </div>
-        </section>
+<div id="view-login" class="login-view hidden">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <i class="fa-solid fa-ghost" style="font-size: 4rem; color: var(--primary); text-shadow: 0 0 20px var(--primary);"></i>
+        <h1 style="font-family: var(--font-head); color: #fff; margin-top: 15px; letter-spacing: 2px;">GHOST PANEL</h1>
+    </div>
+    <div style="width: 100%; max-width: 300px;">
+        <input type="password" id="login-pass" placeholder="Enter System Password" style="text-align: center; margin-bottom: 15px; border-color: var(--primary);">
+        <button onclick="handleLogin()" style="width: 100%; padding: 15px; background: var(--primary); border: none; font-family: var(--font-head); font-weight: bold; cursor: pointer; border-radius: 8px; color: #000; box-shadow: 0 0 15px var(--border-glow);">ACCESS SYSTEM</button>
+    </div>
+</div>
 
-        <div class="emotes-container" id="emotes-grid">
-            </div>
+<div id="view-panel" class="container hidden">
+    <header>
+        <div class="header-title"><i class="fa-solid fa-ghost"></i> GHOST EMOTE SERVER</div>
+    </header>
 
-        <div class="footer">
-            <a href="https://t.me/GhostOwner" target="_blank" class="social-btn"><i class="fa-brands fa-telegram"></i></a>
-            <a href="#" class="social-btn"><i class="fa-brands fa-youtube"></i></a>
+    <div class="section-box" style="border-color: var(--primary);">
+        <div class="section-title title-green"><i class="fa-solid fa-users"></i> TEAM CODE</div>
+        <div class="input-wrapper">
+            <input type="text" id="inp-tc" placeholder="Enter Team Code (e.g. 0729486)">
         </div>
     </div>
 
-    <script>
-        const EMOTE_LIST = [
-            {id:"909000098", name:"EVO UMP"}, {id:"909051014", name:"PUFFY RIDE"}, {id:"909050009", name:"CIRCLE"},
-            {id:"909051013", name:"PETALS"}, {id:"909051012", name:"BOW"}, {id:"909051010", name:"MOTORBIKES"},
-            {id:"909051004", name:"SHOWER"}, {id:"909051002", name:"DREAM"}, {id:"909000014", name:"THRONE"},
-            {id:"909000010", name:"ROSE"}, {id:"909033001", name:"EVO M4A1"}, {id:"909000063", name:"EVO AK"},
-            {id:"909000081", name:"EVO M10G"}, {id:"909039011", name:"EVO M10R"}, {id:"909000075", name:"EVO MP40"}
-        ];
+    <div class="section-box" style="border-color: var(--secondary);">
+        <div class="section-title title-blue"><i class="fa-solid fa-id-card"></i> TARGET UIDS</div>
+        <div class="input-wrapper"><input type="text" id="inp-uid1" placeholder="Main UID (Required)"><i class="fa-solid fa-user copy-btn"></i></div>
+        <div class="input-wrapper"><input type="text" id="inp-uid2" placeholder="UID 2 (Optional)"><i class="fa-solid fa-user copy-btn"></i></div>
+        <div class="input-wrapper"><input type="text" id="inp-uid3" placeholder="UID 3 (Optional)"><i class="fa-solid fa-user copy-btn"></i></div>
+        <div class="input-wrapper"><input type="text" id="inp-uid4" placeholder="UID 4 (Optional)"><i class="fa-solid fa-user copy-btn"></i></div>
+        <div class="input-wrapper"><input type="text" id="inp-uid5" placeholder="UID 5 (Optional)"><i class="fa-solid fa-user copy-btn"></i></div>
+    </div>
 
-        function handleLogin() {
-            const pass = document.getElementById('login-pass').value;
-            if(pass === "60") {
-                document.getElementById('view-login').classList.add('hidden');
-                document.getElementById('view-panel').classList.remove('hidden');
-                renderEmotes();
-            } else {
-                alert("Wrong Password!");
-            }
+    <div class="section-box" style="border-color: var(--accent);">
+        <div class="section-title title-pink">
+            <i class="fa-solid fa-bolt"></i> INJECT EMOTE
+            <span id="emote-count" style="margin-left: auto; font-size: 0.7rem; opacity: 0.7;">0 ITEMS</span>
+        </div>
+        <input type="text" id="search-emote" placeholder="Search Emote Name..." oninput="filterEmotes()">
+        <div class="emotes-grid" id="emotes-grid"></div>
+    </div>
+</div>
+
+<script>
+    // --- VERIFICATION LOGIC ---
+    let linksVerified = 0;
+    const totalLinks = 4;
+
+    window.onload = function() {
+        if (localStorage.getItem('ax_verified_user') === 'true') {
+            document.getElementById('view-login').classList.remove('hidden');
+        } else {
+            document.getElementById('unlock-step-1').classList.remove('hidden');
         }
+    };
 
-        function renderEmotes() {
-            const grid = document.getElementById('emotes-grid');
-            grid.innerHTML = '';
-            EMOTE_LIST.forEach(emo => {
+    function startLoadingStep1(btn) {
+        const loader = btn.querySelector('.btn-loader');
+        loader.style.display = 'inline-block';
+        setTimeout(() => {
+            loader.style.display = 'none';
+            btn.classList.add('ready');
+            btn.innerHTML = 'VERIFIED ✓';
+            setTimeout(() => {
+                document.getElementById('unlock-step-1').classList.add('hidden');
+                document.getElementById('unlock-step-2').classList.remove('hidden');
+            }, 800);
+        }, 2500);
+    }
+
+    function handleLinkTask(btn) {
+        if(btn.classList.contains('verified')) return;
+        const loader = btn.querySelector('.btn-loader');
+        loader.style.display = 'inline-block';
+        setTimeout(() => {
+            loader.style.display = 'none';
+            btn.classList.add('verified');
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> VERIFIED';
+            linksVerified++;
+            if(linksVerified === totalLinks) {
+                document.getElementById('final-verify-btn').classList.add('ready');
+            }
+        }, 3000);
+    }
+
+    function completeVerification() {
+        if(linksVerified < totalLinks) return;
+        const btn = document.getElementById('final-verify-btn');
+        btn.querySelector('.btn-loader').style.display = 'inline-block';
+        setTimeout(() => {
+            localStorage.setItem('ax_verified_user', 'true');
+            document.getElementById('unlock-step-2').classList.add('hidden');
+            document.getElementById('view-login').classList.remove('hidden');
+        }, 1500);
+    }
+
+    // --- ORIGINAL PANEL LOGIC (NO CHANGES) ---
+    const EMOTE_DATA = {
+        "p90": 909049010, "m60": 909051003, "mp5": 909033002, "groza": 909041005, "thompson": 909038010,
+        "m10_2": 909039011, "mp40_2": 909040010, "m10": 909000081, "xm8": 909000085, "ak": 909000063,
+        "mp40": 909000075, "m4a1": 909033001, "famas": 909000090, "scar": 909000068, "ump": 909000098,
+        "m18": 909035007, "fist": 909037011, "g18": 909038012, "an94": 909035012, "woodpecker": 909042008,
+        "money": 909000055, "heart": 909000045, "jamai": 909000010, "throne": 909000014, "pirate": 909000034,
+        "car": 909000039, "lol": 909000002, "cobra": 909000072, "ghost": 909036001, "sholay": 909050020,
+        "blade": 909050013, "hello": 909000001, "dab": 909000005, "chicken": 909000006, "dance": 909000008,
+        "babyshark": 909000009, "pushup": 909000012, "dragon": 909000015, "highfive": 909000025, "selfie": 909000032,
+        "breakdance": 909000040, "kungfu": 909000041, "thor": 909050008, "rasengan": 909047015, "ninja": 909047018,
+        "clone": 909047019, "fireball": 909050005, "provoke": 909000003, "applause": 909000004, "armwave": 909000007,
+        "puffyride": 909051014, "circle": 909050009, "petals": 909051013, "bow": 909051012, "motorbike": 909051010,
+        "shower": 909051004, "dream": 909051002, "angelic": 909051001, "paint": 909048015, "sword": 909044015,
+        "flar": 909041008, "owl": 909049003, "bigdill": 909049001, "csgm": 909041013, "mapread": 909050014,
+        "tomato": 909050015, "ninjasummon": 909050002, "100": 909042007, "auraboat": 909050028, "flyingguns": 909049012,
+        "valentineheart": 909038004, "rampagebook": 909034001, "guildflag": 909049017, "fish": 909040004,
+        "inosuke": 909041003, "mummydance": 909000011, "shuffling": 909000013, "dangerousgame": 909000016,
+        "jaguardance": 909000017, "threaten": 909000018, "shakewithme": 909000019, "old": 909000020,
+        "furiousslam": 909000021, "moonflip": 909000022, "wigglewalk": 909000023, "battledance": 909000024,
+        "shakeitup": 909000026, "gloriousspin": 909000027, "cranekick": 909000028, "partydance": 909000029,
+        "jigdance": 909000031, "soulshaking": 909000033, "healingdance": 909000035, "topdj": 909000036,
+        "deathglare": 909000037, "powerofmoney": 909000038, "eatmydust": 909000039, "bonappetit": 909000042,
+        "aimfire": 909000043, "swan": 909000044, "teatime": 909000046, "bringiton": 909000047, "whyohwhy": 909000048,
+        "fancyhands": 909000049, "shimmy": 909000051, "doggie": 909000052, "challengeon": 909000053, "lasso": 909000054,
+        "imrich": 909000055, "morepractice": 909000079, "ffws2021": 909000080, "goodgame": 909000082,
+        "greetings": 909000083, "walker": 909000084, "mythosfour": 909000086, "championgrab": 909000087,
+        "winandchill": 909000088, "hadouken": 909000089, "bigsmash": 909000091, "fancysteps": 909000092,
+        "allincontrol": 909000093, "debugging": 909000094, "waggorwave": 909000095, "crazyguitar": 909000096,
+        "poof": 909000097, "challenger": 909000099, "t1": 909000100, "t2": 909000101, "t3": 909000102,
+        "t4": 909000103, "t5": 909000104, "t6": 909000105, "t7": 909000106, "t8": 909000107,
+        "dribbleking": 909000121, "ffwsguitar": 909000122, "mindit": 909000123, "goldencombo": 909000124,
+        "sickmoves": 909000125, "rapswag": 909000126, "battleinstyle": 909000127, "rulersflag": 909000128,
+        "moneythrow": 909000129, "endlessbullets": 909000130, "smoothsway": 909000131, "number1": 909000132,
+        "fireslam": 909000133, "heartbroken": 909000134, "rockpaperscissors": 909000135, "shatteredreality": 909000136,
+        "haloofmusic": 909000137, "burntbbq": 909000138, "switchingsteps": 909000139, "creedslay": 909000140,
+        "leapoffail": 909000141, "rhythmgirl": 909000142, "helicoptership": 909000143, "kungfutigers": 909000144,
+        "possessedwarrior": 909000145, "raiseyourthumb": 909000150, "fireborn": 909033001, "goldenfeather": 909033002,
+        "comeanddance": 909033003, "dropkick": 909033004, "sitdown": 909033005, "booyahsparks": 909033006,
+        "ffwsdance": 909033007, "easypeasy": 909033008, "winnerthrow": 909033009, "weightofvictory": 909033010,
+        "chronicle": 909034001, "collapse": 909034002, "flaminggroove": 909034003, "energetic": 909034004,
+        "ridicule": 909034005, "teasewaggor": 909034006, "greatconductor": 909034007, "fakedeath": 909034008,
+        "twerk": 909034009, "brheroic": 909034010, "brmaster": 909034011, "csheroic": 909034012, "csmaster": 909034013,
+        "yesido": 909034014, "freemoney": 909035001, "singersb03": 909035002, "victoriouseagle": 909035005,
+        "flyingsaucer": 909035006, "weaponmagician": 909035007, "bobbledance": 909035008, "weighttraining": 909035009,
+        "beautifullove": 909035010, "groovemoves": 909035011, "howlersrage": 909035012, "louderplease": 909035013,
+        "ninjastand": 909035014, "creatorinaction": 909035015, "ghostfloat": 909036001, "shibasurf": 909036002,
+        "waiterwalk": 909036003, "grafficameraman": 909036004, "agileboxer": 909036005, "sunbathing": 909036006,
+        "skateboardswag": 909036008, "phantomtamer": 909036009, "signal": 909036010, "eternaldescent": 909036011,
+        "swaggydance": 909036012, "admire": 909036014, "reindeerfloat": 909037001, "bamboodance": 909037002,
+        "constellationdance": 909037003, "trophygrab": 909037004, "starryhands": 909037005, "yum": 909037006,
+        "happydancing": 909037007, "juggle": 909037008, "neonsign": 909037009, "beasttease": 909037010,
+        "drachentear": 909037011, "clapdance": 909037012, "influencer": 909038001, "macarena": 909038002,
+        "technoblast": 909038003, "angrywalk": 909038005, "makesomenoise": 909038006, "crocohooray": 909038008,
+        "scorpionspin": 909038009, "cindersummon": 909038010, "shallwedance": 909038011, "spinmaster": 909038013,
+        "festival": 909039001, "artisticdance": 909039002, "forwardbackward": 909039003, "scorpionfriend": 909039004,
+        "achingpower": 909039005, "earthlyforce": 909039006, "grenademagic": 909039007, "ohyeah": 909039008,
+        "graceonwheels": 909039009, "flex": 909039010, "firebeasttamer": 909039012, "crimsontunes": 909039013,
+        "swaggyvsteps": 909039014, "chromaticfinish": 909040001, "smashthefeather": 909040002, "sonoroussteps": 909040003,
+        "chromaticpop": 909040005, "chromatwist": 909040006, "birthofjustice": 909040008, "spidersense": 909040009,
+        "chromasonicshot": 909040010, "playwiththunderbolt": 909040011, "anniversary": 909040012, "wisdomswing": 909040013,
+        "thunderflash": 909041001, "whirlpool": 909041002, "flyinginksword": 909041004, "dancepuppet": 909041006,
+        "highknees": 909041007, "feeltheelectricity": 909041009, "whacacotton": 909041010, "honorablemention": 909041011,
+        "brgrandmaster": 909041012, "monsterclubbing": 909041014, "basudaradance": 909041015, "stirfryfrostfire": 909042001,
+        "moneyrain": 909042002, "frostfirecalling": 909042003, "stompingfoot": 909042004, "thisway": 909042005,
+        "excellentservice": 909042006, "lvl100": 909042007, "realtiger": 909042008, "celebrationschuss": 909042009,
+        "dawnvoyage": 909042011, "lamborghiniride": 909042012, "toiletman": 909042013, "handgrooves": 909042016,
+        "kemusan": 909042018, "ribbitrider": 909043001, "innerself": 909043002, "emperortreasure": 909043003,
+        "whysochaos": 909043004, "hugefeast": 909043005, "colorburst": 909043006, "dragonswipe": 909043007,
+        "samba": 909043008, "speedsummon": 909043009, "whatamatch": 909043010, "whatapair": 909043013,
+        "bytemounting": 909044001, "unicyclist": 909044002, "basketrafting": 909044003, "happylamb": 909044004,
+        "paradox": 909044005, "harmoniousparadox": 909044006, "raiseyourthumb2": 909044007, "claphands": 909044008,
+        "donedeal": 909044009, "starcatcher": 909044010, "paradoxwings": 909044011, "zombified": 909044012,
+        "honkup": 909044016, "cyclone": 909045001, "springrocker": 909045002, "giddyup": 909045003, "goosydance": 909045004,
+        "captainvictor": 909045005, "youknowimgood": 909045006, "stepstep": 909045007, "superyay": 909045008,
+        "moonwalk": 909045009, "flowersalute": 909045010, "foxyrun": 909045011, "waggorsseesaw": 909045012,
+        "floatingmeditation": 909045015, "naatunaatu": 909045016, "championswalk": 909045017, "auraboarder": 909046001,
+        "booyahchamp": 909046002, "controlledcombustion": 909046003, "cheerstovictory": 909046004, "shoeshining": 909046005,
+        "gunspinning": 909046006, "crowdpleaser": 909046007, "nosweat": 909046008, "magmaquake": 909046009,
+        "maxfirepower": 909046010, "canttouchthis": 909046011, "firestarter": 909046012, "ffwsflag": 909046013,
+        "beatdrop": 909046014, "spatialawareness": 909046015, "trapping": 909046016, "soaringup": 909046017,
+        "wontbowdown": 909047001, "aurora": 909047002, "couchfortwo": 909047003, "flutterdash": 909047004,
+        "slipperythrone": 909047005, "acceptancespeech": 909047006, "lovemelovemenot": 909047007, "scissorsavvy": 909047008,
+        "thinker": 909047009, "matchcountdown": 909047010, "hiptwists": 909047011, "jkt48": 909047012,
+        "stormyascent": 909047013, "thousandyears": 909047016, "ninjasign": 909047017, "ninjarun": 909047018,
+        "clonejutsu": 909047019, "rescue": 909048001, "midnightperuse": 909048002, "guitargroove": 909048003,
+        "keyboardplayer": 909048004, "ondrums": 909048005, "chacchac": 909048006, "pillowfight": 909048007,
+        "targetpractice": 909048008, "goofycamel": 909048009, "hitasix": 909048010, "flagsummon": 909048011,
+        "swiftsteps": 909048012, "carnivalfunk": 909048013, "slurp": 909048014, "halftime": 909048016,
+        "throwin": 909048017, "bailalorocky": 909048018, "handraise": 909049002, "slapandtwist": 909049004,
+        "sidewiggle": 909049005, "creationdays": 909049006, "rainingcoins": 909049007, "clapclaphooray": 909049008,
+        "infiniteloops": 909049009, "p90surfer": 909049010, "boxingmachine": 909049011, "comicbarf": 909049013,
+        "driveby": 909049014, "pedalmetal": 909049015, "spearspin": 909049016, "discodazzle": 909049018,
+        "squatchallenge": 909049019, "winninggoal": 909049020, "headhigh": 909049021, "finalbattle": 909050003,
+        "foreheadpoke": 909050004, "fireballjutsu": 909050005, "flyingraijin": 909050006, "drumtwirl": 909050010,
+        "bunnyaction": 909050011, "broomswoosh": 909050012, "tacticalmoveout": 909050016, "bunnywiggle": 909050017,
+        "flamingheart": 909050018, "rainorshine": 909050019, "peakpoints": 909050021, "new1": 909052001,
+        "new2": 909052002, "new3": 909052003, "new4": 909052004, "new5": 909052005, "new6": 909052006,
+        "new7": 909052007, "new8": 909052008
+    };
+
+    function handleLogin() {
+        if(document.getElementById('login-pass').value === "60") {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-panel').classList.remove('hidden');
+            renderEmotes();
+        } else { alert("Wrong Password!"); }
+    }
+
+    function renderEmotes(filter = "") {
+        const grid = document.getElementById('emotes-grid');
+        grid.innerHTML = '';
+        let count = 0;
+        for (let key in EMOTE_DATA) {
+            if (key.includes(filter.toLowerCase())) {
+                const id = EMOTE_DATA[key];
                 const card = document.createElement('div');
                 card.className = 'emote-card';
-                card.onclick = () => sendEmote(emo.id, card);
+                card.onclick = () => sendEmote(id, card);
                 card.innerHTML = `
-                    <img src="https://cdn.jsdelivr.net/gh/ShahGCreator/icon@main/PNG/${emo.id}.png" onerror="this.src='https://via.placeholder.com/70?text=Emote'">
-                    <span>${emo.name}</span>
+                    <img src="https://cdn.jsdelivr.net/gh/ShahGCreator/icon@main/PNG/${id}.png" onerror="this.src='https://via.placeholder.com/70?text=Emote'">
+                    <span>${key}</span>
                 `;
                 grid.appendChild(card);
-            });
+                count++;
+            }
+        }
+        document.getElementById('emote-count').innerText = count + " ITEMS";
+    }
+
+    function filterEmotes() {
+        const val = document.getElementById('search-emote').value;
+        renderEmotes(val);
+    }
+
+    async function sendEmote(emoteId, element) {
+        const tc = document.getElementById('inp-tc').value.trim();
+        const uids = [
+            document.getElementById('inp-uid1').value.trim(),
+            document.getElementById('inp-uid2').value.trim(),
+            document.getElementById('inp-uid3').value.trim(),
+            document.getElementById('inp-uid4').value.trim(),
+            document.getElementById('inp-uid5').value.trim()
+        ].filter(id => id !== "");
+
+        if(!tc || uids.length === 0) {
+            showToast("Team Code and at least one UID required!");
+            return;
         }
 
-        async function sendEmote(emoteId, element) {
-            const tc = document.getElementById('inp-tc').value.trim();
-            const u1 = document.getElementById('inp-uid1').value.trim();
-            const u2 = document.getElementById('inp-uid2').value.trim();
-            const u3 = document.getElementById('inp-uid3').value.trim();
-            const u4 = document.getElementById('inp-uid4').value.trim();
-            const u5 = document.getElementById('inp-uid5').value.trim();
+        const loader = document.createElement('div');
+        loader.className = 'loader-overlay';
+        loader.innerHTML = '<div class="spinner"></div>';
+        element.appendChild(loader);
 
-            if(!tc || !u1) {
-                showToast("Please enter Team Code and UID 1", "error");
-                return;
-            }
-
-            // Show Loader
-            const loader = document.createElement('div');
-            loader.className = 'loader-overlay';
-            loader.innerHTML = '<div class="spinner"></div>';
-            element.appendChild(loader);
-
-            // Your Exact API Format:
-            // https://mrghost.onrender.com/join?tc=7181966&uid1=14491301036&uid2={}&uid3={}&uid4=&uid5={}&uid={}&emote_id=909000098
-            const finalUrl = `https://mrghost.onrender.com/join?tc=${tc}&uid1=${u1}&uid2={${u2}}&uid3={${u3}}&uid4=${u4}&uid5={${u5}}&uid={${u1}}&emote_id=${emoteId}`;
-
+        let success = 0;
+        for (let uid of uids) {
+            const finalUrl = `https://mrghost.onrender.com/join?tc=${tc}&uid1=${uid}&uid2={uid2}&uid3={uid3}&uid4={uid4}&uid5={uid5}&uid6={uid6}&emote_id=${emoteId}`;
             try {
-                await fetch(finalUrl, { 
-                    method: 'GET',
-                    mode: 'no-cors' 
-                });
-                showToast("Bot Request Sent!");
-            } catch (err) {
-                showToast("Connection Error", "error");
-            } finally {
-                setTimeout(() => loader.remove(), 1000);
-            }
+                await fetch(finalUrl, { method: 'GET', mode: 'no-cors' });
+                success++;
+            } catch (e) { console.log("Error for: " + uid); }
         }
+        showToast(`Success: Request sent for ${success} UIDs!`);
+        setTimeout(() => loader.remove(), 600);
+    }
 
-        function showToast(msg) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-    </script>
+    function showToast(msg) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Matrix BG Animation
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/15)).fill(1);
+    function draw() {
+        ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "#0f8"; ctx.font = "12px monospace";
+        drops.forEach((y, i) => {
+            ctx.fillText(Math.floor(Math.random()*2), i*15, y*15);
+            if(y*15 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+    }
+    setInterval(draw, 50);
+</script>
 </body>
 </html>
